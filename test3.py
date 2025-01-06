@@ -47,27 +47,26 @@ def generate_corrected_sparse_tridiagonal_matrix(n, diagonal_value=5, off_diagon
 
 
 def jacobi_dense(A, b, x0, tol=1e-6, max_iter=1000):
-    """
-    Jacobi method for dense matrices.
-
-    Args:
-        A: Dense coefficient matrix (numpy array).
-        b: Right-hand side vector (numpy array).
-        x0: Initial guess for the solution vector (numpy array).
-        tol: Tolerance for convergence.
-        max_iter: Maximum number of iterations.
-
-    Returns:
-        x: Approximate solution vector.
-        iterations: Number of iterations performed.
-        time_taken: Time taken for the iterations.
-    """
-    ### TODO: Code your thing here!
+    n = A.shape[0]
+    x = x0.copy()
+    errors = []
     start_time = time.time()
-    x_new = x0.copy()
+
+    for i in range(max_iter):
+        x_new = x.copy()
+        for j in range(n):
+            x_new[j] = (b[j] - np.dot(A[j, :], x) + A[j, j] * x[j]) / A[j, j]
+        error = np.linalg.norm(x_new - x)
+        errors.append(error)
+        x = x_new.copy()
+        if error < tol:
+            break
+
     end_time = time.time()
     time_taken = end_time - start_time
-    return x_new, 1, time_taken
+
+    return x, i + 1, time_taken, errors
+
 
 def jacobi_sparse(A, b, x0, tol=1e-7, max_iter=10000):
     """
