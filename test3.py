@@ -69,23 +69,17 @@ def jacobi_dense(A, b, x0, tol=1e-6, max_iter=1000):
 
 
 def jacobi_sparse(A, b, x0, tol=1e-7, max_iter=10000):
-    """
-    Jacobi method for sparse matrices.
 
-    Args:
-        A: Sparse coefficient matrix (scipy.sparse.csr_matrix).
-        b: Right-hand side vector (numpy array).
-        x0: Initial guess for the solution vector (numpy array).
-        tol: Tolerance for convergence.
-        max_iter: Maximum number of iterations.
-
-    Returns:
-        x: Approximate solution vector.
-        iterations: Number of iterations performed.
-        time_taken: Time taken for the iterations.
-    """
-    ### TODO: Adapt code here
+    n=A.shape[0]
+    x=x0.copy()
     x_new = x0.copy()
+    D=A.diagonal()
+    L_U=A-sparse.diag(D)
+    for  i in range (max_iter):
+        x_new=(b-L_U.dot(x))/D
+        if np.linalg.norm(x_new-x,ord=np.inf)<tol:
+            break
+        x=x_new
     start_time = time.time()
     end_time = time.time()
     time_taken = end_time - start_time
