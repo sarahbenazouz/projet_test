@@ -36,10 +36,8 @@ def generate_corrected_sparse_tridiagonal_matrix(n, diagonal_value=5, off_diagon
         for j in range (n):
             if i == j:
                 A_dense[i, i] = diagonal_value
-            if i > 0:  # sous diagonale
-                A_dense[i, i - 1] = off_diagonal_value
-            if i < n - 1:  # sur diagonale
-                A_dense[i, i + 1] = off_diagonal_value
+            else:
+                A_dense[i,j] = random.randint(-100,100)
 
     b = np.zeros_like(x0)
     return As, A_dense, b
