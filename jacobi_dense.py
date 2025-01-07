@@ -8,6 +8,7 @@ def generate_linear_system(n):
         for j in range(n):
             if i == j:
                 A[i, i] = 5 * (i + 1)  # Set diagonal elements
+                #A[i, i] = 10 * n # Set diagonal dominance
             else:
                 A[i, j] = -1  # Set off-diagonal elements
     
