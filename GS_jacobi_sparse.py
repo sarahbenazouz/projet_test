@@ -69,8 +69,9 @@ def jacobi_sparse_with_error(A, b, x0, x_exact, tol=eps, max_iter=max):
     L_U = A - sparse.diags(D)
     for i in range(max_iter):
         x_new = (b - L_U.dot(x)) / D
-        error = np.linalg.norm(x_new - x_exact)
+        error = np.linalg.norm(x_new - x_exact,ord=np.inf)
         errors.append(error)
+        x = x_new
         if error < tol:
             break
         x = x_new
