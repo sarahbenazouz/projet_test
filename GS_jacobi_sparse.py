@@ -43,8 +43,11 @@ def generate_sparse_tridiagonal_matrix(n):
 
     return As,  A_dense, b
 
+eps=10E-7
+max=1000
 
-def jacobi_sparse_with_error(A, b, x0, x_exact, tol=1e-6, max_iter=1000):
+
+def jacobi_sparse_with_error(A, b, x0, x_exact, tol=eps, max_iter=max):
     n = A.shape[0]
     errors = []
     x = x0.copy()
@@ -59,7 +62,7 @@ def jacobi_sparse_with_error(A, b, x0, x_exact, tol=1e-6, max_iter=1000):
         x = x_new
     return x, i + 1, errors
 
-def gauss_seidel_sparse_with_error(A, b, x0, x_exact, tol=1e-6, max_iter=1000):
+def gauss_seidel_sparse_with_error(A, b, x0, x_exact,tol=eps, max_iter=max):
   n = A.shape[0]
   x = x0.copy()
   errors = []
@@ -80,23 +83,28 @@ def gauss_seidel_sparse_with_error(A, b, x0, x_exact, tol=1e-6, max_iter=1000):
 ### TODO: 
 # Set up all the important parameters
 # Set up all useful plotting tools
-n=5
+n=10
 
 
 As,Ad,b = generate_sparse_tridiagonal_matrix(n)
 x0=np.zeros(np.size(b))
 
+eps=10E-7
+max_iter=1000
+
 As_dense = As.toarray()  # Convert sparse matrix to dense
 x_exact = np.linalg.solve(As_dense, b)
 
 # Jacobi spare
-x_j, iter_j, error1 = jacobi_sparse_with_error(As, b, x0,x_exact)
+x_j, iter_j, error1 = jacobi_sparse_with_error(As, b, x0,x_exact,eps,max)
 
 # GS sparse
-x_g, iter_g, error2 = gauss_seidel_sparse_with_error(As, b, x0,x_exact)
+x_g, iter_g, error2 = gauss_seidel_sparse_with_error(As, b, x0,x_exact,eps,max)
 
 print(f"Jacobi (Sparse): {iter_j} itérations, erreur = {error1} ")
 print(f"GS (Sparse) : {iter_g} itérations, erreur = {error2} ")
+#print(f"iteration:{iter_g}")
+
 
 def plot_error_convergence(error1, error2, iter_j, iter_g):
     plt.figure(figsize=(10, 6))
@@ -104,7 +112,7 @@ def plot_error_convergence(error1, error2, iter_j, iter_g):
     plt.semilogy(range(1, len(error2) + 1), error2, 'r-', label='Gauss-Seidel')
     plt.xlabel('Iterations')
     plt.ylabel('Error (log scale)')
-    plt.title('Error Convergence: Jacobi vs Gauss-Seidel')
+    plt.title(f'Error Convergence: Jacobi vs Gauss-Seidel with n={n}')
     plt.legend()
     plt.grid(True)
     plt.show()
