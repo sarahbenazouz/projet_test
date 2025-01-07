@@ -44,25 +44,22 @@ def generate_sparse_tridiagonal_matrix(n):
     return As,  A_dense, b
 
 
-def jacobi_sparse_with_error(A, b, x0,x_exact, tol=1e-6, max_iter=1000):
-    n=A.shape[0]
+def jacobi_sparse_with_error(A, b, x0, x_exact, tol=1e-6, max_iter=1000):
+    n = A.shape[0]
     errors = []
-    x=x0.copy()
-    x_new = x0.copy()
-    D=A.diagonal()
-    L_U=A-sparse.diags(D)
-    for  i in range (max_iter):
-        x_new=(b-L_U.dot(x))/D
-        if np.linalg.norm(x_new-x,ord=np.inf)<tol:
+    x = x0.copy()
+    D = A.diagonal()
+    L_U = A - sparse.diags(D)
+    for i in range(max_iter):
+        x_new = (b - L_U.dot(x)) / D
+        error = np.linalg.norm(x_new - x_exact)
+        errors.append(error)
+        if np.linalg.norm(x_new - x, ord=np.inf) < tol:
             break
-        x=x_new
-    error = np.linalg.norm(x_new-x)
-    errors.append(error)
-
+        x = x_new
     return x, i + 1, errors
 
 def gauss_seidel_sparse_with_error(A, b, x0, x_exact, tol=1e-6, max_iter=1000):
-    
   n = A.shape[0]
   x = x0.copy()
   errors = []
@@ -72,7 +69,7 @@ def gauss_seidel_sparse_with_error(A, b, x0, x_exact, tol=1e-6, max_iter=1000):
             S1=np.dot(A[i,:i].toarray(),x_new[:i])
             S2=np.dot(A[i,i+1:].toarray(),x[i+1:])
             x_new[i] = (b[i] - S1 -S2) / A[i, i]
-    error = np.linalg.norm(x_exact-x_new)
+    error = np.linalg.norm(x_new-x_exact)
     errors.append(error)
     x = x_new
     if error < tol:
@@ -83,17 +80,33 @@ def gauss_seidel_sparse_with_error(A, b, x0, x_exact, tol=1e-6, max_iter=1000):
 ### TODO: 
 # Set up all the important parameters
 # Set up all useful plotting tools
-n=10
+n=5
+
+
 As,Ad,b = generate_sparse_tridiagonal_matrix(n)
 x0=np.zeros(np.size(b))
 
+As_dense = As.toarray()  # Convert sparse matrix to dense
+x_exact = np.linalg.solve(As_dense, b)
 
 # Jacobi spare
-x_j, iter_j, error1 = jacobi_sparse_with_error(As, b, x0)
+x_j, iter_j, error1 = jacobi_sparse_with_error(As, b, x0,x_exact)
 
 # GS sparse
-x_g, iter_g, error2 = gauss_seidel_sparse_with_error(As, b, x0)
+x_g, iter_g, error2 = gauss_seidel_sparse_with_error(As, b, x0,x_exact)
 
 print(f"Jacobi (Sparse): {iter_j} itérations, erreur = {error1} ")
 print(f"GS (Sparse) : {iter_g} itérations, erreur = {error2} ")
 
+def plot_error_convergence(error1, error2, iter_j, iter_g):
+    plt.figure(figsize=(10, 6))
+    plt.semilogy(range(1, len(error1) + 1), error1, 'b-', label='Jacobi')
+    plt.semilogy(range(1, len(error2) + 1), error2, 'r-', label='Gauss-Seidel')
+    plt.xlabel('Iterations')
+    plt.ylabel('Error (log scale)')
+    plt.title('Error Convergence: Jacobi vs Gauss-Seidel')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+plot_error_convergence(error1, error2, iter_j, iter_g)
