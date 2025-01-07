@@ -17,6 +17,13 @@ def generate_linear_system(n):
 
     return A, b
 
+   
+A0 = np.array([[2,-1],[-1,2]])
+A1 = np.array([[3,0,4],[7,4,2],[-1,1,2]])
+A2 = np.array([[-3,3,-6],[-4,7,-8],[5,7,-9]])
+A3 = np.array([[4,1,1],[2,-9,0],[0,-8,-6]])
+A4 = np.array([[7,6,9],[4,5,-4],[-7,-3,8]])
+
 
 def jacobi_method(A, b, x0, tol=1e-5, max_iter=1000):
 
@@ -35,6 +42,23 @@ def jacobi_method(A, b, x0, tol=1e-5, max_iter=1000):
 
   return x, i + 1, errors
 
+#Booleen qui test si la matrice est à diagonale dominante
+def diagonale_dominance(A):
+    n = A.shape[0]
+    for i in range(n):
+        # Somme des éléments hors diagonale sur la ligne i
+        sum_non_diag = sum(abs(A[i, j]) for j in range(n) if j != i)
+        
+        # Vérifier la condition de dominance diagonale
+        if abs(A[i, i]) < sum_non_diag:
+            return False  # Si une ligne ne respecte pas la condition, ce n'est pas dominant
+    
+    return True  # Toutes les lignes respectent la condition
+
+def rayon_spectral(A):
+    vp=np.linalg.eigvals(A)
+    p=max(abs(vp))
+    return p
 
 def plot_error(errors, iterations):
     plt.figure(figsize=(8, 6))
@@ -48,14 +72,20 @@ def plot_error(errors, iterations):
 
 
 # Example usage:
-n = 100
-A, b = generate_linear_system(n)  # Generate a linear system
+n = 3
+M, b = generate_linear_system(n)  # Generate a linear system
 x0 = np.zeros(np.size(b))
 
 
+A=M
+#test domination
+print(diagonale_dominance(A))
 
+#test rayon spectral
+print(rayon_spectral(A))
 # Solve using Jacobi method
 x_jacobi, iterations, errors = jacobi_method(A, b, x0)
+
 
 # Calculate exact solution
 x_exact = np.linalg.solve(A, b)
@@ -64,7 +94,6 @@ x_exact = np.linalg.solve(A, b)
 print(f"Iterations: {iterations}")
 print(f"Solution Jacobi: {x_jacobi}")
 print(f"Exact solution: {x_exact}")
-print(A)
 
 # Plot the error
 plot_error(errors, iterations)
