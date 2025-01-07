@@ -34,8 +34,10 @@ def generate_corrected_sparse_tridiagonal_matrix(n, diagonal_value=5, off_diagon
         for j in range(n):
             if i == j:
                 A_dense[i, i] = diagonal_value
-            else:
-                A_dense[i, j] = 3  # Valeur hors-diagonale
+            if i > 0:
+                A_dense[i, i-1] = off_diagonal_value
+            if i < n-1:
+                A_dense[i, i+1] = off_diagonal_value
 
     # Vecteur b
     b = np.random.rand(n)
@@ -43,7 +45,7 @@ def generate_corrected_sparse_tridiagonal_matrix(n, diagonal_value=5, off_diagon
     return As, A_dense, b
 
 
-def jacobi_dense(A, b, x0, tol=1e-6, max_iter=1000):
+def jacobi_dense(A, b, x0, tol=1e-7, max_iter=1000):
     """
     Méthode Jacobi pour matrices denses.
     """
@@ -57,13 +59,10 @@ def jacobi_dense(A, b, x0, tol=1e-6, max_iter=1000):
         x_new = np.zeros_like(x)
         for j in range(n):
             x_new[j] = (b[j] - np.dot(A[j, :], x) + A[j, j] * x[j]) / A[j, j]
-
         error = np.linalg.norm(x_new - x, ord=np.inf)
         errors.append(error)
-
         if error < tol:
             break
-
         x = x_new
 
     end_time = time.time()
@@ -83,10 +82,8 @@ def jacobi_sparse(As, b, x0, tol=1e-7, max_iter=10000):
     for i in range(max_iter):
         x_new = (b - L_U.dot(x)) / D
         error = np.linalg.norm(x_new - x, ord=np.inf)
-
         if error < tol:
             break
-
         x = x_new
 
     end_time = time.time()
